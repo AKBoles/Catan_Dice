@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catan Dice Roller</title>
+  <style>
+    :root {
+      --catan-red: #c0392b;
+      --catan-blue: #2471a3;
+      --catan-gold: #d4a017;
+      --catan-brown: #6e4b3a;
+      --catan-sand: #f5e6ca;
+      --catan-ocean: #1a5276;
+      --bg: #fdf6ec;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: #2c3e50;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--catan-ocean), var(--catan-blue));
+      color: white;
+      text-align: center;
+      padding: 1.2rem 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      opacity: 0.85;
+      font-size: 0.95rem;
+      margin-top: 0.3rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Dice display */
+    .dice-area {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+
+    .die {
+      width: 90px;
+      height: 90px;
+      background: white;
+      border: 3px solid var(--catan-brown);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      font-weight: bold;
+      color: var(--catan-brown);
+      box-shadow: 2px 3px 6px rgba(0,0,0,0.15);
+      transition: transform 0.3s;
+    }
+
+    .die.rolling {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(-15deg) scale(1.1); }
+      40% { transform: rotate(12deg) scale(1.05); }
+      60% { transform: rotate(-8deg) scale(1.08); }
+      80% { transform: rotate(5deg) scale(1.02); }
+    }
+
+    .total-display {
+      text-align: center;
+      margin: 0.5rem 0 1rem;
+    }
+
+    .total-display .total-value {
+      font-size: 2.4rem;
+      font-weight: bold;
+      color: var(--catan-brown);
+    }
+
+    .total-display .total-label {
+      font-size: 0.9rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .total-display.is-seven .total-value {
+      color: var(--catan-red);
+    }
+
+    /* Event die */
+    .event-display {
+      text-align: center;
+      margin: 0.5rem 0 1rem;
+      min-height: 2rem;
+    }
+
+    .event-badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .event-badge.barbarian { background: #e74c3c; color: white; }
+    .event-badge.trade { background: var(--catan-gold); color: #333; }
+    .event-badge.politics { background: #2ecc71; color: #333; }
+    .event-badge.science { background: var(--catan-blue); color: white; }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+
+    button:active { transform: scale(0.96); }
+
+    .btn-roll {
+      background: linear-gradient(135deg, var(--catan-red), #e74c3c);
+      color: white;
+      font-size: 1.2rem;
+      padding: 1rem 2.5rem;
+      box-shadow: 0 3px 10px rgba(192,57,43,0.35);
+    }
+
+    .btn-roll:hover { box-shadow: 0 4px 14px rgba(192,57,43,0.5); }
+
+    .btn-event {
+      background: linear-gradient(135deg, var(--catan-gold), #f1c40f);
+      color: #333;
+      box-shadow: 0 3px 10px rgba(212,160,23,0.3);
+    }
+
+    .btn-event:hover { box-shadow: 0 4px 14px rgba(212,160,23,0.45); }
+
+    .btn-reset {
+      background: #bdc3c7;
+      color: #333;
+    }
+
+    .btn-reset:hover { background: #a6acaf; }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin: 0.75rem 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--catan-gold);
+    }
+
+    /* Robber alert */
+    .robber-banner {
+      background: var(--catan-red);
+      color: white;
+      text-align: center;
+      padding: 0.6rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin: 0.5rem 0;
+      display: none;
+      animation: flash 0.6s ease-in-out 2;
+    }
+
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Stats section */
+    .stats-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    .stats-section h2 {
+      font-size: 1.1rem;
+      color: var(--catan-brown);
+      margin-bottom: 0.75rem;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #f0ebe3;
+    }
+
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row .label { color: #888; }
+    .stat-row .value { font-weight: 600; }
+    .stat-row .value.seven-count { color: var(--catan-red); }
+
+    /* Distribution chart */
+    .chart-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-top: 1rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    .chart-section h2 {
+      font-size: 1.1rem;
+      color: var(--catan-brown);
+      margin-bottom: 0.75rem;
+    }
+
+    .chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 140px;
+      padding-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .chart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+    }
+
+    .chart-col .bar-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .chart-col .bar {
+      width: 70%;
+      min-width: 12px;
+      background: var(--catan-blue);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.4s ease;
+    }
+
+    .chart-col .bar.seven {
+      background: var(--catan-red);
+    }
+
+    .chart-col .expected-line {
+      width: 90%;
+      height: 2px;
+      background: var(--catan-gold);
+      position: absolute;
+      transition: bottom 0.4s ease;
+    }
+
+    .chart-col .num-label {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .chart-col .count-label {
+      font-size: 0.65rem;
+      color: #aaa;
+      margin-bottom: 2px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      color: #888;
+    }
+
+    .legend span::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    .legend .actual::before { background: var(--catan-blue); }
+    .legend .seven-legend::before { background: var(--catan-red); }
+    .legend .expected::before { background: var(--catan-gold); }
+
+    /* History */
+    .history-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    .history-section h2 {
+      font-size: 1.1rem;
+      color: var(--catan-brown);
+      margin-bottom: 0.5rem;
+    }
+
+    .history-list {
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.88rem;
+    }
+
+    .history-entry {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid #f5f0e8;
+    }
+
+    .history-entry:last-child { border-bottom: none; }
+
+    .history-entry .roll-num { color: #aaa; min-width: 2.5rem; }
+    .history-entry .roll-dice { color: #555; }
+    .history-entry .roll-total { font-weight: 600; min-width: 2rem; text-align: right; }
+    .history-entry .roll-total.seven { color: var(--catan-red); }
+    .history-entry .roll-event { font-size: 0.8rem; margin-left: 0.5rem; }
+
+    .empty-state {
+      text-align: center;
+      color: #bbb;
+      padding: 1.5rem 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Catan Dice</h1>
+  <p>Fair digital dice for your Catan games</p>
+</header>
+
+<div class="container">
+
+  <div class="dice-area">
+    <div class="die" id="die1">?</div>
+    <div class="die" id="die2">?</div>
+  </div>
+
+  <div class="total-display" id="totalDisplay">
+    <div class="total-label">Total</div>
+    <div class="total-value" id="totalValue">&mdash;</div>
+  </div>
+
+  <div class="event-display" id="eventDisplay"></div>
+
+  <div id="robberBanner" class="robber-banner">
+    The Robber strikes! Move the robber.
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-roll" id="btnRoll" onclick="roll(false)">Roll Dice</button>
+  </div>
+
+  <div class="toggle-row">
+    <input type="checkbox" id="ckEvent">
+    <label for="ckEvent">Cities &amp; Knights event die</label>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-reset" onclick="resetGame()">New Game</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-section" id="statsSection">
+    <h2>Game Stats</h2>
+    <div class="stat-row">
+      <span class="label">Rolls</span>
+      <span class="value" id="statRolls">0</span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Sevens (Robber)</span>
+      <span class="value seven-count" id="statSevens">0</span>
+    </div>
+    <div class="stat-row">
+      <span class="label">Seven rate</span>
+      <span class="value" id="statSevenRate">&mdash;</span>
+    </div>
+  </div>
+
+  <!-- Distribution chart -->
+  <div class="chart-section">
+    <h2>Roll Distribution</h2>
+    <div class="chart" id="chart"></div>
+    <div class="legend">
+      <span class="actual">Actual</span>
+      <span class="seven-legend">Sevens</span>
+      <span class="expected">Expected</span>
+    </div>
+  </div>
+
+  <!-- Roll history -->
+  <div class="history-section">
+    <h2>Roll History</h2>
+    <div class="history-list" id="historyList">
+      <div class="empty-state">No rolls yet &mdash; roll the dice!</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const EXPECTED = {2:2.78,3:5.56,4:8.33,5:11.11,6:13.89,7:16.67,8:13.89,9:11.11,10:8.33,11:5.56,12:2.78};
+const DIE_FACES = {1:'\u2680',2:'\u2681',3:'\u2682',4:'\u2683',5:'\u2684',6:'\u2685'};
+
+let rolling = false;
+
+// Build chart columns on load
+(function initChart() {
+  const chart = document.getElementById('chart');
+  for (let n = 2; n <= 12; n++) {
+    const col = document.createElement('div');
+    col.className = 'chart-col';
+    col.innerHTML = `
+      <span class="count-label" id="count-${n}">0</span>
+      <div class="bar-wrap">
+        <div class="bar${n === 7 ? ' seven' : ''}" id="bar-${n}" style="height:0"></div>
+        <div class="expected-line" id="exp-${n}" style="bottom:0"></div>
+      </div>
+      <span class="num-label">${n}</span>
+    `;
+    chart.appendChild(col);
+  }
+})();
+
+async function roll() {
+  if (rolling) return;
+  rolling = true;
+
+  const useEvent = document.getElementById('ckEvent').checked;
+  const url = useEvent ? '/roll/event' : '/roll';
+
+  // Animate dice
+  const d1 = document.getElementById('die1');
+  const d2 = document.getElementById('die2');
+  d1.classList.add('rolling');
+  d2.classList.add('rolling');
+
+  const res = await fetch(url, { method: 'POST' });
+  const data = await res.json();
+
+  // Short delay for animation feel
+  await new Promise(r => setTimeout(r, 400));
+
+  d1.classList.remove('rolling');
+  d2.classList.remove('rolling');
+  d1.textContent = DIE_FACES[data.die1];
+  d2.textContent = DIE_FACES[data.die2];
+
+  // Total
+  const td = document.getElementById('totalDisplay');
+  document.getElementById('totalValue').textContent = data.total;
+  td.className = 'total-display' + (data.total === 7 ? ' is-seven' : '');
+
+  // Robber banner
+  const banner = document.getElementById('robberBanner');
+  if (data.total === 7) {
+    banner.style.display = 'block';
+    banner.style.animation = 'none';
+    banner.offsetHeight; // reflow
+    banner.style.animation = '';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // Event die
+  const ed = document.getElementById('eventDisplay');
+  if (data.event_label) {
+    ed.innerHTML = `<span class="event-badge ${data.event_symbol}">${data.event_label}</span>`;
+  } else {
+    ed.innerHTML = '';
+  }
+
+  // Stats
+  document.getElementById('statRolls').textContent = data.roll_number;
+  document.getElementById('statSevens').textContent = data.sevens;
+  const rate = data.roll_number > 0 ? ((data.sevens / data.roll_number) * 100).toFixed(1) + '%' : '\u2014';
+  document.getElementById('statSevenRate').textContent = rate + ' (expected 16.7%)';
+
+  // Update chart
+  updateChart(data.distribution, data.roll_number);
+
+  // Update history
+  addHistoryEntry(data);
+
+  rolling = false;
+}
+
+function updateChart(dist, total) {
+  let maxCount = 0;
+  for (let n = 2; n <= 12; n++) {
+    const c = dist[String(n)] || 0;
+    if (c > maxCount) maxCount = c;
+  }
+
+  const chartHeight = 110; // px available for bars
+  for (let n = 2; n <= 12; n++) {
+    const c = dist[String(n)] || 0;
+    const barH = maxCount > 0 ? (c / maxCount) * chartHeight : 0;
+    document.getElementById('bar-' + n).style.height = barH + 'px';
+    document.getElementById('count-' + n).textContent = c;
+
+    // Expected line position
+    const expCount = (EXPECTED[n] / 100) * total;
+    const expH = maxCount > 0 ? (expCount / maxCount) * chartHeight : 0;
+    const line = document.getElementById('exp-' + n);
+    line.style.bottom = (expH + 20) + 'px'; // offset for num-label
+  }
+}
+
+function addHistoryEntry(data) {
+  const list = document.getElementById('historyList');
+  if (list.querySelector('.empty-state')) list.innerHTML = '';
+
+  const entry = document.createElement('div');
+  entry.className = 'history-entry';
+  let html = `
+    <span class="roll-num">#${data.roll_number}</span>
+    <span class="roll-dice">${DIE_FACES[data.die1]} + ${DIE_FACES[data.die2]}</span>
+    <span class="roll-total${data.total === 7 ? ' seven' : ''}">${data.total}</span>
+  `;
+  if (data.event_label) {
+    html += `<span class="roll-event event-badge ${data.event_symbol}">${data.event_label}</span>`;
+  }
+  entry.innerHTML = html;
+  list.prepend(entry);
+}
+
+async function resetGame() {
+  await fetch('/reset', { method: 'POST' });
+  document.getElementById('die1').textContent = '?';
+  document.getElementById('die2').textContent = '?';
+  document.getElementById('totalValue').textContent = '\u2014';
+  document.getElementById('totalDisplay').className = 'total-display';
+  document.getElementById('eventDisplay').innerHTML = '';
+  document.getElementById('robberBanner').style.display = 'none';
+  document.getElementById('statRolls').textContent = '0';
+  document.getElementById('statSevens').textContent = '0';
+  document.getElementById('statSevenRate').textContent = '\u2014';
+  document.getElementById('historyList').innerHTML = '<div class="empty-state">No rolls yet \u2014 roll the dice!</div>';
+
+  // Reset chart
+  for (let n = 2; n <= 12; n++) {
+    document.getElementById('bar-' + n).style.height = '0';
+    document.getElementById('count-' + n).textContent = '0';
+    document.getElementById('exp-' + n).style.bottom = '20px';
+  }
+}
+
+// Keyboard shortcut: press Space or Enter to roll
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'Enter') {
+    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+      e.preventDefault();
+      roll();
+    }
+  }
+});
+</script>
+
+</body>
+</html>
