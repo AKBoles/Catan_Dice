@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+<rect width="192" height="192" rx="40" fill="#2c1810"/>
+<rect x="30" y="50" width="52" height="52" rx="10" fill="#f5e6c8"/>
+<circle cx="56" cy="63" r="5" fill="#1a0f0a"/>
+<circle cx="43" cy="76" r="5" fill="#1a0f0a"/>
+<circle cx="69" cy="76" r="5" fill="#1a0f0a"/>
+<circle cx="56" cy="89" r="5" fill="#1a0f0a"/>
+<rect x="110" y="90" width="52" height="52" rx="10" fill="#f5e6c8"/>
+<circle cx="123" cy="103" r="5" fill="#1a0f0a"/>
+<circle cx="149" cy="103" r="5" fill="#1a0f0a"/>
+<circle cx="123" cy="129" r="5" fill="#1a0f0a"/>
+<circle cx="149" cy="129" r="5" fill="#1a0f0a"/>
+<text x="96" y="178" text-anchor="middle" font-family="serif" font-weight="900" font-size="22" fill="#d4a843">CATAN</text>
+</svg>
