@@ -1,0 +1,23 @@
+var CACHE_NAME = 'catan-roller-v1';
+var urlsToCache = [
+  '/',
+  '/static/style.css',
+  '/static/app.js',
+  '/static/icon.svg'
+];
+
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(urlsToCache);
+    })
+  );
+});
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request).then(function(response) {
+      return response || fetch(event.request);
+    })
+  );
+});
