@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2c1810">
+<title>Catan Roller</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">Catan</div>
+    <div class="turn-badge">Roll <span id="rollCount">0</span></div>
+  </div>
+
+  <div class="players" id="playerBar"></div>
+
+  <div class="dice-zone">
+    <div class="dice-row">
+      <div class="die" id="die1"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+      <div class="die" id="die2"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+    </div>
+    <div class="total-display">
+      <div class="total-num" id="totalNum">&ndash;</div>
+      <div class="robber-alert" id="robberAlert">&#9876; Move the Robber &#9876;</div>
+    </div>
+  </div>
+
+  <button class="roll-btn" id="rollBtn" onclick="rollDice()">Roll</button>
+
+  <div class="stats-bar" id="statsBar"></div>
+  <div class="history" id="history"></div>
+
+  <div class="bottom-bar">
+    <button class="action-btn" onclick="undoRoll()"><span class="icon">&#8617;</span>Undo</button>
+    <button class="action-btn" onclick="resetGame()"><span class="icon">&#8635;</span>Reset</button>
+    <button class="action-btn" onclick="openSettings()"><span class="icon">&#9881;</span>Setup</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal" onclick="closeSettings(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>Game Setup</h2>
+    <div style="margin-bottom:12px">
+      <label style="font-size:14px;color:var(--cream);display:block;margin-bottom:8px">Players (tap to toggle)</label>
+      <div class="player-setup" id="playerSetup"></div>
+    </div>
+    <div class="modal-row">
+      <div>
+        <label>Sound &amp; Vibration</label>
+        <div class="note">Haptic feedback on roll</div>
+      </div>
+      <button class="toggle on" id="toggleVibrate" onclick="toggleSetting(this)"></button>
+    </div>
+    <div class="modal-row">
+      <div>
+        <label>Auto-advance Turn</label>
+        <div class="note">Next player after each roll</div>
+      </div>
+      <button class="toggle on" id="toggleAutoTurn" onclick="toggleSetting(this)"></button>
+    </div>
+    <button class="modal-close" onclick="closeSettings()">Done</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
