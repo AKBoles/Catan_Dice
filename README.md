@@ -3,24 +3,22 @@
 Mobile-first dice roller & stats companion for Settlers of Catan.
 
 ## Features
-- **Animated dice** with haptic feedback
-- **Roll distribution chart** — see if the dice are "fair"
-- **Robber alert** — flash + vibrate on 7s
-- **Player turn tracking** — auto-advances, supports 2-6 players
-- **Undo & Reset** — fix mis-rolls
-- **Installable PWA** — add to home screen, works offline
-- **Persistent state** — resume your game after closing
+- Animated dice with haptic feedback
+- Roll distribution chart
+- Robber alert on 7s
+- Player turn tracking (2-6 players)
+- Undo & Reset
+- Installable PWA
+- Persistent state via localStorage
 
-## Deploy to Render (Free)
-1. Push this folder to a GitHub repo
-2. Go to [render.com](https://render.com) → New → Web Service
-3. Connect your repo
-4. Render auto-detects `render.yaml` — click Deploy
-5. Share the URL with your Catan group
+## Deploy to Render
+1. Push to GitHub
+2. Render → New → Web Service → connect repo
+3. Build command: `pip install -r requirements.txt`
+4. Start command: `gunicorn app:app --bind 0.0.0.0:$PORT`
 
 ## Run Locally
 ```bash
 pip install -r requirements.txt
 python app.py
 ```
-Open http://localhost:5000 on your phone (same Wi-Fi).
